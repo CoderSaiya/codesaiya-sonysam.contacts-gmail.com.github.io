@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Login Test</title>
+</head>
+<body>
+    <h2>Login with Google or Facebook</h2>
+    <button onclick="loginWithGoogle()">Login with Google</button>
+    <button onclick="loginWithFacebook()">Login with Facebook</button>
+
+    <script>
+        // Function to start Google login process
+        function loginWithGoogle() {
+            window.location.href = "https://localhost:7115/api/Auth/signin-google";
+        }
+
+        // Function to start Facebook login process
+        function loginWithFacebook() {
+            window.location.href = "https://localhost:7115/api/Auth/signin-facebook";
+        }
+
+        // Function to handle OAuth callback and save JWT token
+        async function handleOAuthCallback() {
+            // Check if 'code' or 'token' is in the URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            
+            if (code) {
+                try {
+                    // Replace the URL with your backend endpoint that exchanges the code for a token
+                    const response = await fetch(`http://localhost:5000/auth/oauth/callback?code=${code}`);
+                    const data = await response.json();
+
+                    if (data.token) {
+                        // Save token to localStorage
+                        localStorage.setItem('access_token', data.token);
+                        alert('Login successful! Token saved.');
+                        
+                        // Optionally, redirect to another page after successful login
+                        window.location.href = '/dashboard.html';
+                    } else {
+                        alert('Failed to retrieve token.');
+                    }
+                } catch (error) {
+                    console.error('Error during token retrieval:', error);
+                    alert('Login failed. Check the console for details.');
+                }
+            }
+        }
+
+        // Run handleOAuthCallback function on page load to process the callback if there is one
+        window.onload = handleOAuthCallback;
+    </script>
+</body>
+</html>
